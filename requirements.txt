@@ -1,7 +1,8 @@
 torch
 ultralytics
-python-opencv
+opencv-python
 pillow
-skimage
+scikit-image
 scikit-learn
 streamlit
+streamlit_image_coordinates
