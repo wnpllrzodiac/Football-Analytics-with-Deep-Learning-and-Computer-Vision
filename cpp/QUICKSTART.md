@@ -103,6 +103,8 @@ Football Analytics - 模型转换工具
 ```batch
 set VCPKG_ROOT=C:\vcpkg
 set ONNXRUNTIME_DIR=C:\onnxruntime
+set FFMPEG_DIR=C:\ffmpeg
+set OPENCV_DIR=c:\opencv
 ```
 
 ### 3.2 运行构建

@@ -9,26 +9,33 @@ message(STATUS "Building Football Analytics C++ Project")
 
 # ==================== 依赖库配置 ====================
 
-# OpenCV
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
-message(STATUS "OpenCV version: ${OpenCV_VERSION}")
+# OpenCV (手动配置)
+set(OPENCV_DIR "C:/OpenCV4.10.0/opencv/build" CACHE PATH "OpenCV installation directory")
+if(EXISTS ${OPENCV_DIR})
+    # 设置包含目录
+    include_directories(${OPENCV_DIR}/include)
+    
+    # 设置库目录 (根据Visual Studio版本选择，这里使用vc16对应VS2019/2022)
+    link_directories(${OPENCV_DIR}/x64/vc16/lib)
+    
+    message(STATUS "OpenCV found at: ${OPENCV_DIR}")
+else()
+    message(FATAL_ERROR "OpenCV not found. Please set OPENCV_DIR to your OpenCV installation")
+endif()
 
 # FFmpeg
-find_package(PkgConfig)
-if(PkgConfig_FOUND)
-    pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
-        libavformat
-        libavcodec
-        libavutil
-        libswscale
-    )
-    message(STATUS "FFmpeg libraries found")
+set(FFMPEG_DIR "D:/sdk/ffmpeg-8.0.1-full_build-shared" CACHE PATH "FFmpeg installation directory")
+if(EXISTS ${FFMPEG_DIR})
+    include_directories(${FFMPEG_DIR}/include)
+    link_directories(${FFMPEG_DIR}/lib)
+    message(STATUS "FFmpeg found at: ${FFMPEG_DIR}")
+else()
+    message(WARNING "FFmpeg not found. Please set FFMPEG_DIR")
 endif()
 
 # ONNX Runtime
 # 请根据实际安装路径调整
-set(ONNXRUNTIME_DIR "C:/onnxruntime" CACHE PATH "ONNX Runtime installation directory")
+set(ONNXRUNTIME_DIR "C:/onnxruntime-win-x64-1.23.2" CACHE PATH "ONNX Runtime installation directory")
 if(EXISTS ${ONNXRUNTIME_DIR})
     include_directories(${ONNXRUNTIME_DIR}/include)
     link_directories(${ONNXRUNTIME_DIR}/lib)
@@ -38,11 +45,10 @@ else()
 endif()
 
 # JSON library (nlohmann/json - header-only)
-find_package(nlohmann_json CONFIG)
-if(NOT nlohmann_json_FOUND)
-    message(STATUS "nlohmann_json not found, will use submodule or download")
-    # 可以通过 vcpkg install nlohmann-json 安装
-endif()
+include(FetchContent)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json)
 
 # ==================== 项目配置 ====================
 
@@ -67,19 +73,27 @@ add_executable(football_analytics ${SOURCES})
 
 # ==================== 链接库 ====================
 
+# OpenCV 库文件 (根据实际版本调整)
+# Release模式使用 opencv_world4100.lib
+# Debug模式使用 opencv_world4100d.lib
+set(OPENCV_LIBS_RELEASE opencv_world4100)
+set(OPENCV_LIBS_DEBUG opencv_world4100d)
+
 target_link_libraries(football_analytics
-    ${OpenCV_LIBS}
+    optimized ${OPENCV_LIBS_RELEASE}
+    debug ${OPENCV_LIBS_DEBUG}
     onnxruntime
+    nlohmann_json::nlohmann_json
 )
 
 # FFmpeg链接
-if(PkgConfig_FOUND)
-    target_link_libraries(football_analytics PkgConfig::LIBAV)
-endif()
-
-# JSON链接（如果找到）
-if(nlohmann_json_FOUND)
-    target_link_libraries(football_analytics nlohmann_json::nlohmann_json)
+if(EXISTS ${FFMPEG_DIR})
+    target_link_libraries(football_analytics
+        avformat
+        avcodec
+        avutil
+        swscale
+    )
 endif()
 
 # Windows特定设置
