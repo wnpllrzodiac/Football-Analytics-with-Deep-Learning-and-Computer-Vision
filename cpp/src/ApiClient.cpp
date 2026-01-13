@@ -59,13 +59,38 @@ void ApiClient::parseBaseUrl() {
     }
 }
 
+// JSON 字符串转义函数
+std::string ApiClient::escapeJsonString(const std::string& str) {
+    std::ostringstream escaped;
+    for (char c : str) {
+        switch (c) {
+            case '"':  escaped << "\\\""; break;
+            case '\\': escaped << "\\\\"; break;
+            case '\b': escaped << "\\b";  break;
+            case '\f': escaped << "\\f";  break;
+            case '\n': escaped << "\\n";  break;
+            case '\r': escaped << "\\r";  break;
+            case '\t': escaped << "\\t";  break;
+            default:
+                if (c < 0x20) {
+                    // 控制字符：输出为 \uXXXX
+                    escaped << "\\u" << std::hex << std::setw(4) 
+                           << std::setfill('0') << static_cast<int>(c);
+                } else {
+                    escaped << c;
+                }
+        }
+    }
+    return escaped.str();
+}
+
 std::string ApiClient::frameDataToJson(const FrameData& data) {
     std::ostringstream json;
     
     json << "{";
     json << "\"frameNumber\":" << data.frameNumber << ",";
     json << "\"timestamp\":" << data.timestamp << ",";
-    json << "\"videoSource\":\"" << data.videoSource << "\",";
+    json << "\"videoSource\":\"" << escapeJsonString(data.videoSource) << "\",";
     
     // 球员检测
     json << "\"players\":[";
@@ -81,7 +106,7 @@ std::string ApiClient::frameDataToJson(const FrameData& data) {
         json << "},";
         json << "\"classId\":" << p.classId << ",";
         json << "\"confidence\":" << std::fixed << std::setprecision(4) << p.confidence << ",";
-        json << "\"label\":\"" << p.label << "\"";
+        json << "\"label\":\"" << escapeJsonString(p.label) << "\"";
         
         // 添加球队ID（如果有）
         if (i < data.teamIds.size()) {
@@ -106,7 +131,7 @@ std::string ApiClient::frameDataToJson(const FrameData& data) {
         if (i > 0) json << ",";
         const auto& k = data.keypoints[i];
         json << "{";
-        json << "\"label\":\"" << k.label << "\",";
+        json << "\"label\":\"" << escapeJsonString(k.label) << "\",";
         json << "\"x\":" << std::fixed << std::setprecision(2) << k.center.x << ",";
         json << "\"y\":" << std::fixed << std::setprecision(2) << k.center.y << ",";
         json << "\"confidence\":" << std::fixed << std::setprecision(4) << k.confidence;
@@ -193,7 +218,7 @@ bool ApiClient::sendBatchFrameData(const std::vector<FrameData>& dataList) {
 bool ApiClient::notifyVideoStart(const std::string& videoSource, int totalFrames) {
     std::ostringstream json;
     json << "{";
-    json << "\"videoSource\":\"" << videoSource << "\",";
+    json << "\"videoSource\":\"" << escapeJsonString(videoSource) << "\",";
     json << "\"totalFrames\":" << totalFrames << ",";
     json << "\"timestamp\":" << std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
@@ -205,7 +230,7 @@ bool ApiClient::notifyVideoStart(const std::string& videoSource, int totalFrames
 bool ApiClient::notifyVideoComplete(const std::string& videoSource) {
     std::ostringstream json;
     json << "{";
-    json << "\"videoSource\":\"" << videoSource << "\",";
+    json << "\"videoSource\":\"" << escapeJsonString(videoSource) << "\",";
     json << "\"timestamp\":" << std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now().time_since_epoch()).count();
     json << "}";

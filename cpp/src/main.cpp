@@ -40,8 +40,8 @@ struct Config {
     std::string videoPath;
     std::string apiUrl = "http://localhost:8080";
     std::string apiKey;
-    std::string playerModelPath = "./models/players.onnx";
-    std::string keypointModelPath = "./models/keypoints.onnx";
+    std::string playerModelPath = "../models/players.onnx";
+    std::string keypointModelPath = "../models/keypoints.onnx";
     std::string tacticalMapPath = "./resources/tactical_map.jpg";
     std::string keypointMapPath = "./config/pitch_map_labels.json";
     float playerConfThreshold = 0.6f;

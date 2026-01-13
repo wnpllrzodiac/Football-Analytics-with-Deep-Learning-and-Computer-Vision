@@ -105,6 +105,11 @@ private:
     std::string frameDataToJson(const FrameData& data);
     
     /**
+     * @brief 转义JSON字符串中的特殊字符
+     */
+    std::string escapeJsonString(const std::string& str);
+    
+    /**
      * @brief 发送POST请求
      * @param endpoint API端点路径
      * @param jsonData JSON数据

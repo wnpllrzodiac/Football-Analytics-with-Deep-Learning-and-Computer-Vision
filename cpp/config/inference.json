@@ -1,0 +1,15 @@
+{
+  "execution_provider": "cpu",
+  "_comment": "Options: 'cpu', 'cuda', 'directml' (Windows GPU), 'auto' (try GPU first, fallback to CPU)",
+  
+  "cpu_options": {
+    "intra_op_num_threads": 4,
+    "graph_optimization_level": "all"
+  },
+  
+  "cuda_options": {
+    "device_id": 0,
+    "gpu_mem_limit": 2147483648,
+    "_comment": "gpu_mem_limit in bytes (2GB = 2147483648)"
+  }
+}

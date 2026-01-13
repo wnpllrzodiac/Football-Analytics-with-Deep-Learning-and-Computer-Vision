@@ -13,26 +13,52 @@ YOLODetector::YOLODetector(const std::string& modelPath,
     , iouThreshold_(iouThreshold)
 {
     try {
+        std::cout << "Initializing ONNX Runtime..." << std::endl;
+        std::cout << "  Model path: " << modelPath << std::endl;
+        
         // 创建ONNX Runtime环境
+        std::cout << "  Creating ONNX Runtime environment..." << std::endl;
         env_ = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_WARNING, "FootballAnalytics");
+        std::cout << "  Environment created successfully" << std::endl;
         
         // 创建会话选项
+        std::cout << "  Creating session options..." << std::endl;
         sessionOptions_ = std::make_unique<Ort::SessionOptions>();
         sessionOptions_->SetIntraOpNumThreads(4);
         sessionOptions_->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         
-        // 尝试使用CUDA（如果可用）
-        // Uncomment these lines if you have CUDA support
-        // OrtCUDAProviderOptions cuda_options;
-        // sessionOptions_->AppendExecutionProvider_CUDA(cuda_options);
+        // === GPU 加速配置 ===
+        // 如果要启用 GPU 加速，需要：
+        // 1. 下载 ONNX Runtime GPU 版本（带 CUDA 的版本）
+        // 2. 安装 CUDA 和 cuDNN
+        // 3. 取消下面的注释
+        
+        // 当前：使用 CPU（兼容性最好）
+        std::cout << "  Using CPU execution provider" << std::endl;
+        
+        /* 要启用 CUDA (GPU)，取消下面的注释：
+        try {
+            std::cout << "  Attempting to use CUDA (GPU)..." << std::endl;
+            OrtCUDAProviderOptions cuda_options;
+            sessionOptions_->AppendExecutionProvider_CUDA(cuda_options);
+            std::cout << "  ✓ CUDA provider enabled (GPU acceleration)" << std::endl;
+        } catch (const std::exception& e) {
+            std::cout << "  ⚠ CUDA not available: " << e.what() << std::endl;
+            std::cout << "  ✓ Falling back to CPU" << std::endl;
+        }
+        */
+        
+        std::cout << "  Session options configured" << std::endl;
         
         // 创建会话
+        std::cout << "  Loading model file..." << std::endl;
 #ifdef _WIN32
         std::wstring wideModelPath(modelPath.begin(), modelPath.end());
         session_ = std::make_unique<Ort::Session>(*env_, wideModelPath.c_str(), *sessionOptions_);
 #else
         session_ = std::make_unique<Ort::Session>(*env_, modelPath.c_str(), *sessionOptions_);
 #endif
+        std::cout << "  Model loaded successfully" << std::endl;
         
         // 获取输入输出信息
         Ort::AllocatorWithDefaultOptions allocator;
@@ -71,8 +97,38 @@ YOLODetector::YOLODetector(const std::string& modelPath,
         std::cout << "  IoU threshold: " << iouThreshold_ << std::endl;
         
     } catch (const Ort::Exception& e) {
-        std::cerr << "ONNX Runtime error: " << e.what() << std::endl;
+        std::cerr << "\n========================================" << std::endl;
+        std::cerr << "ONNX Runtime Exception Caught!" << std::endl;
+        std::cerr << "========================================" << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Error code: " << e.GetOrtErrorCode() << std::endl;
+        std::cerr << "Model path: " << modelPath << std::endl;
+        std::cerr << "\nPossible causes:" << std::endl;
+        std::cerr << "  1. onnxruntime.dll not found or wrong version" << std::endl;
+        std::cerr << "  2. Model file doesn't exist or is corrupted" << std::endl;
+        std::cerr << "  3. Incompatible ONNX Runtime version" << std::endl;
+        std::cerr << "\nTroubleshooting:" << std::endl;
+        std::cerr << "  1. Run: .\\diagnose_onnx.ps1" << std::endl;
+        std::cerr << "  2. Check: ONNX_TROUBLESHOOTING.md" << std::endl;
+        std::cerr << "  3. Copy DLL: copy C:\\onnxruntime-win-x64-1.23.2\\lib\\onnxruntime.dll build\\Release\\" << std::endl;
+        std::cerr << "========================================\n" << std::endl;
         throw std::runtime_error("Failed to initialize YOLODetector: " + std::string(e.what()));
+    } catch (const std::exception& e) {
+        std::cerr << "\n========================================" << std::endl;
+        std::cerr << "Standard Exception Caught!" << std::endl;
+        std::cerr << "========================================" << std::endl;
+        std::cerr << "Error: " << e.what() << std::endl;
+        std::cerr << "Model path: " << modelPath << std::endl;
+        std::cerr << "========================================\n" << std::endl;
+        throw;
+    } catch (...) {
+        std::cerr << "\n========================================" << std::endl;
+        std::cerr << "Unknown Exception Caught!" << std::endl;
+        std::cerr << "========================================" << std::endl;
+        std::cerr << "Model path: " << modelPath << std::endl;
+        std::cerr << "This is unusual. Please check system logs." << std::endl;
+        std::cerr << "========================================\n" << std::endl;
+        throw;
     }
 }
 

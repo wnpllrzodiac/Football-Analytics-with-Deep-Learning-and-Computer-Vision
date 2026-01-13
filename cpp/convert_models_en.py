@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Football Analytics - 模型转换脚本
-将PyTorch YOLOv8模型转换为ONNX格式
+Football Analytics - Model Conversion Script
+Convert PyTorch YOLOv8 models to ONNX format
 """
 
 import os
@@ -20,12 +20,12 @@ def check_ultralytics():
 
 def convert_model(pt_path, output_dir, model_name):
     """
-    转换单个模型
+    Convert a single model
     
     Args:
-        pt_path: PyTorch模型路径
-        output_dir: 输出目录
-        model_name: 输出模型名称
+        pt_path: PyTorch model path
+        output_dir: Output directory
+        model_name: Output model name
     """
     from ultralytics import YOLO
     
@@ -37,95 +37,88 @@ def convert_model(pt_path, output_dir, model_name):
     print(f"Output path: {output_dir}/{model_name}")
     
     try:
-        # 加载模型
+        # Load model
         model = YOLO(pt_path)
         
-        # 导出为ONNX
+        # Export to ONNX
         success = model.export(
             format='onnx',
-            imgsz=640,          # 输入尺寸
-            dynamic=False,      # 固定批次大小
-            simplify=True,      # 简化ONNX图
-            opset=12,           # ONNX操作集版本
-            half=False          # 使用FP32精度
+            imgsz=640,          # Input size
+            dynamic=False,      # Fixed batch size
+            simplify=True,      # Simplify ONNX graph
+            opset=12,           # ONNX opset version
+            half=False          # Use FP32 precision
         )
         
         if success:
-            # 移动并重命名文件
+            # Move and rename file
             exported_file = str(Path(pt_path).with_suffix('.onnx'))
             output_file = os.path.join(output_dir, model_name)
             
             if os.path.exists(exported_file):
                 os.makedirs(output_dir, exist_ok=True)
                 
-                # 如果目标文件已存在，先删除
+                # Remove existing file if present
                 if os.path.exists(output_file):
                     os.remove(output_file)
                 
-                # 移动文件
+                # Move file
                 os.rename(exported_file, output_file)
-                print(f"✓ 转换成功: {output_file}")
+                print(f"SUCCESS: Converted to {output_file}")
                 
-                # 显示文件大小
+                # Display file size
                 file_size = os.path.getsize(output_file) / (1024 * 1024)
-                print(f"  文件大小: {file_size:.2f} MB")
+                print(f"  File size: {file_size:.2f} MB")
                 
                 return True
             else:
-                print(f"✗ 导出文件未找到: {exported_file}")
+                print(f"ERROR: Exported file not found: {exported_file}")
                 return False
         else:
-            print("✗ 模型导出失败")
+            print("ERROR: Model export failed")
             return False
             
     except Exception as e:
-        print(f"✗ 转换过程中出错: {str(e)}")
+        print(f"ERROR during conversion: {str(e)}")
         return False
 
 def main():
-    """主函数"""
-    import sys
-    import io
-    
-    # 设置输出编码为UTF-8
-    if sys.platform == 'win32':
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    
+    """Main function"""
     print("=" * 60)
     print("Football Analytics - Model Conversion Tool")
     print("=" * 60)
     
-    # 检查依赖
+    # Check dependencies
     if not check_ultralytics():
         sys.exit(1)
     
-    # 定义模型路径（相对于项目根目录）
+    # Define model paths (relative to project root)
     project_root = Path(__file__).parent.parent
     
     models_to_convert = [
         {
-            'name': '球员检测模型',
+            'name': 'Player Detection Model',
             'pt_path': project_root / 'models' / 'Yolo8L Players' / 'weights' / 'best.pt',
             'output_name': 'players.onnx'
         },
         {
-            'name': '关键点检测模型',
+            'name': 'Keypoint Detection Model',
             'pt_path': project_root / 'models' / 'Yolo8M Field Keypoints' / 'weights' / 'best.pt',
             'output_name': 'keypoints.onnx'
         }
     ]
     
-    # 输出目录
+    # Output directory
     output_dir = Path(__file__).parent / 'models'
     output_dir.mkdir(exist_ok=True)
     
-    print(f"\n输出目录: {output_dir}")
-    print(f"找到 {len(models_to_convert)} 个模型待转换\n")
+    print(f"\nOutput directory: {output_dir}")
+    print(f"Found {len(models_to_convert)} models to convert\n")
     
-    # 转换所有模型
+    # Convert all models
     results = []
     for i, model_info in enumerate(models_to_convert, 1):
-        print(f"\n[{i}/{len(models_to_convert)}] 正在处理: {model_info['name']}")
+        print(f"\n[{i}/{len(models_to_convert)}] Processing: {model_info['name']}")
         print("-" * 60)
         
         success = convert_model(
@@ -136,32 +129,32 @@ def main():
         
         results.append((model_info['name'], success))
     
-    # 显示总结
+    # Display summary
     print("\n" + "=" * 60)
-    print("转换结果总结")
+    print("Conversion Results Summary")
     print("=" * 60)
     
     for name, success in results:
-        status = "✓ 成功" if success else "✗ 失败"
+        status = "SUCCESS" if success else "FAILED"
         print(f"{status}: {name}")
     
-    # 统计
+    # Statistics
     success_count = sum(1 for _, success in results if success)
     total_count = len(results)
     
     print("\n" + "=" * 60)
-    print(f"总计: {success_count}/{total_count} 个模型转换成功")
+    print(f"Total: {success_count}/{total_count} models converted successfully")
     print("=" * 60)
     
     if success_count == total_count:
-        print("\n✓ 所有模型转换完成！")
-        print("\n下一步:")
-        print("1. 复制 tactical_map.jpg 到 cpp/resources/ 目录")
-        print("2. 运行 build.bat 编译C++项目")
-        print("3. 运行程序: football_analytics.exe --video path/to/video.mp4")
+        print("\nAll models converted successfully!")
+        print("\nNext steps:")
+        print("1. Copy tactical_map.jpg to cpp/resources/ directory")
+        print("2. Run build.bat to compile C++ project")
+        print("3. Run program: football_analytics.exe --video path/to/video.mp4")
         return 0
     else:
-        print("\n✗ 部分模型转换失败，请检查错误信息")
+        print("\nSome models failed to convert, please check error messages")
         return 1
 
 if __name__ == '__main__':
