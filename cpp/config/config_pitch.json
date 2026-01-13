@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "YOLOv8",
+    "version": "8M",
+    "input_size": [640, 640],
+    "num_keypoints": 29,
+    "description": "Football field keypoint detection model"
+  },
+  "inference": {
+    "confidence_threshold": 0.7,
+    "iou_threshold": 0.45,
+    "min_keypoints_for_homography": 4
+  },
+  "homography": {
+    "displacement_tolerance": 7.0,
+    "ransac_threshold": 3.0,
+    "update_strategy": "adaptive"
+  }
+}

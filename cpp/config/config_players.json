@@ -1,0 +1,29 @@
+{
+  "model": {
+    "type": "YOLOv8",
+    "version": "8L",
+    "input_size": [640, 640],
+    "classes": [
+      {
+        "id": 0,
+        "name": "player",
+        "description": "Football player"
+      },
+      {
+        "id": 1,
+        "name": "referee",
+        "description": "Referee"
+      },
+      {
+        "id": 2,
+        "name": "ball",
+        "description": "Football"
+      }
+    ]
+  },
+  "inference": {
+    "confidence_threshold": 0.6,
+    "iou_threshold": 0.45,
+    "max_detections": 100
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "Center circle": [640, 360],
+  "Left penalty spot": [150, 360],
+  "Right penalty spot": [1130, 360],
+  "Left goal left post": [50, 280],
+  "Left goal right post": [50, 440],
+  "Right goal left post": [1230, 280],
+  "Right goal right post": [1230, 440],
+  "Left corner top": [80, 80],
+  "Left corner bottom": [80, 640],
+  "Right corner top": [1200, 80],
+  "Right corner bottom": [1200, 640],
+  "Midfield left": [640, 80],
+  "Midfield right": [640, 640],
+  "Left penalty area top left": [150, 200],
+  "Left penalty area top right": [300, 200],
+  "Left penalty area bottom left": [150, 520],
+  "Left penalty area bottom right": [300, 520],
+  "Right penalty area top left": [980, 200],
+  "Right penalty area top right": [1130, 200],
+  "Right penalty area bottom left": [980, 520],
+  "Right penalty area bottom right": [1130, 520]
+}
