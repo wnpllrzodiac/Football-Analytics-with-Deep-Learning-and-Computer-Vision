@@ -28,25 +28,22 @@ YOLODetector::YOLODetector(const std::string& modelPath,
         sessionOptions_->SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         
         // === GPU 加速配置 ===
-        // 如果要启用 GPU 加速，需要：
-        // 1. 下载 ONNX Runtime GPU 版本（带 CUDA 的版本）
-        // 2. 安装 CUDA 和 cuDNN
-        // 3. 取消下面的注释
-        
-        // 当前：使用 CPU（兼容性最好）
-        std::cout << "  Using CPU execution provider" << std::endl;
-        
-        /* 要启用 CUDA (GPU)，取消下面的注释：
+        // 尝试启用 CUDA GPU 加速，如果失败则自动回退到 CPU
         try {
             std::cout << "  Attempting to use CUDA (GPU)..." << std::endl;
             OrtCUDAProviderOptions cuda_options;
+            cuda_options.device_id = 0;  // 使用第一个 GPU
+            cuda_options.arena_extend_strategy = 0;  // kNextPowerOfTwo
+            cuda_options.gpu_mem_limit = 2ULL * 1024 * 1024 * 1024;  // 2GB 显存限制
+            cuda_options.cudnn_conv_algo_search = OrtCudnnConvAlgoSearchExhaustive;
+            cuda_options.do_copy_in_default_stream = 1;
+            
             sessionOptions_->AppendExecutionProvider_CUDA(cuda_options);
             std::cout << "  ✓ CUDA provider enabled (GPU acceleration)" << std::endl;
         } catch (const std::exception& e) {
             std::cout << "  ⚠ CUDA not available: " << e.what() << std::endl;
             std::cout << "  ✓ Falling back to CPU" << std::endl;
         }
-        */
         
         std::cout << "  Session options configured" << std::endl;
         

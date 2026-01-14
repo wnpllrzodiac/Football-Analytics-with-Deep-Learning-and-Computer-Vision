@@ -8,5 +8,6 @@ streamlit
 streamlit_image_coordinates
 onnx
 onnxruntime
+#onnxruntime-gpu
 onnxslim
 flask

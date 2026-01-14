@@ -75,7 +75,18 @@ std::vector<cv::Scalar> TeamPredictor::extractColorPalette(const cv::Mat& frame,
     int centerY2 = std::min(playerRgb.rows / 3 + playerRgb.rows / 5, playerRgb.rows);
     
     cv::Rect centerRegion(centerX1, centerY1, centerX2 - centerX1, centerY2 - centerY1);
+    
+    // 验证中心区域有效性
+    if (centerRegion.width <= 0 || centerRegion.height <= 0) {
+        return palette;
+    }
+    
     cv::Mat centerImg = playerRgb(centerRegion);
+    
+    // 检查提取的图像是否为空
+    if (centerImg.empty() || centerImg.rows == 0 || centerImg.cols == 0) {
+        return palette;
+    }
     
     // 转换为浮点数
     cv::Mat floatImg;
@@ -83,6 +94,22 @@ std::vector<cv::Scalar> TeamPredictor::extractColorPalette(const cv::Mat& frame,
     
     // 重塑为一维数组
     cv::Mat samples = floatImg.reshape(1, floatImg.rows * floatImg.cols);
+    
+    // 验证 samples 的维度和类型
+    if (samples.empty() || samples.dims > 2 || samples.type() != CV_32FC3) {
+        return palette;
+    }
+    
+    // 检查样本数量是否足够进行聚类
+    int numSamples = samples.rows;
+    if (numSamples < numPaletteColors_) {
+        // 样本数不足，直接计算平均颜色
+        if (numSamples > 0) {
+            cv::Scalar meanColor = cv::mean(centerImg);
+            palette.push_back(meanColor);
+        }
+        return palette;
+    }
     
     // 使用K-means聚类提取主要颜色
     int clusterCount = numPaletteColors_;

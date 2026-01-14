@@ -40,8 +40,8 @@ struct Config {
     std::string videoPath;
     std::string apiUrl = "http://localhost:8080";
     std::string apiKey;
-    std::string playerModelPath = "../models/players.onnx";
-    std::string keypointModelPath = "../models/keypoints.onnx";
+    std::string playerModelPath = "./models/players.onnx";
+    std::string keypointModelPath = "./models/keypoints.onnx";
     std::string tacticalMapPath = "./resources/tactical_map.jpg";
     std::string keypointMapPath = "./config/pitch_map_labels.json";
     float playerConfThreshold = 0.6f;
@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
             auto frameDuration = std::chrono::duration_cast<std::chrono::milliseconds>(
                 frameEndTime - frameStartTime).count();
             
-            if (frameNumber % 30 == 0 || frameNumber == videoReader.getTotalFrames()) {
+            if (frameNumber % 3 == 0 || frameNumber == videoReader.getTotalFrames()) {
                 float progress = (float)frameNumber / videoReader.getTotalFrames() * 100.0f;
                 auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
                     frameEndTime - startTime).count();

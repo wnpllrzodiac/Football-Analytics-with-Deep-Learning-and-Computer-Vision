@@ -115,21 +115,71 @@ pip3 install --user \
 
 ### 选项 A：使用预编译版本（推荐）
 
+#### 🖥️ CPU 版本（兼容所有系统）
+
 ```bash
 cd ~/Downloads
 
-# 下载 ONNX Runtime 1.23.2 (Linux x64)
+# 下载 ONNX Runtime 1.23.2 (Linux x64, CPU)
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.23.2/onnxruntime-linux-x64-1.23.2.tgz
 
-# 解压到 /opt
-sudo mkdir -p /opt/onnxruntime
-sudo tar -xzf onnxruntime-linux-x64-1.23.2.tgz -C /opt/onnxruntime --strip-components=1
+# 解压到用户目录（无需 sudo）
+mkdir -p ~/work/tools/onnxruntime
+tar -xzf onnxruntime-linux-x64-1.23.2.tgz
+mv onnxruntime-linux-x64-1.23.2/* ~/work/tools/onnxruntime/
 
 # 设置环境变量（添加到 ~/.bashrc）
-echo 'export ONNXRUNTIME_DIR=/opt/onnxruntime' >> ~/.bashrc
-echo 'export LD_LIBRARY_PATH=/opt/onnxruntime/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+echo 'export ONNXRUNTIME_DIR=~/work/tools/onnxruntime' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=~/work/tools/onnxruntime/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
+
+#### 🚀 GPU 版本（需要 NVIDIA GPU + CUDA 11.x）
+
+**前置要求：**
+- NVIDIA GPU（支持 CUDA）
+- NVIDIA 驱动已安装（验证：`nvidia-smi`）
+- CUDA 11.x 工具包（验证：`nvcc --version`）
+
+```bash
+cd ~/Downloads
+
+# 1. 下载 ONNX Runtime 1.16.3 GPU 版本（兼容 CUDA 11.x）
+wget https://github.com/microsoft/onnxruntime/releases/download/v1.16.3/onnxruntime-linux-x64-gpu-1.16.3.tgz
+
+# 2. 解压到用户目录
+mkdir -p ~/work/tools/onnxruntime-gpu
+tar -xzf onnxruntime-linux-x64-gpu-1.16.3.tgz
+mv onnxruntime-linux-x64-gpu-1.16.3/* ~/work/tools/onnxruntime-gpu/
+
+# 3. 下载并安装 cuDNN 8.9.7（ONNX Runtime GPU 依赖）
+wget https://developer.download.nvidia.com/compute/cudnn/redist/cudnn/linux-x86_64/cudnn-linux-x86_64-8.9.7.29_cuda11-archive.tar.xz
+tar -xf cudnn-linux-x86_64-8.9.7.29_cuda11-archive.tar.xz
+mkdir -p ~/work/tools/cudnn8-libs
+cp -r cudnn-linux-x86_64-8.9.7.29_cuda11-archive/lib/* ~/work/tools/cudnn8-libs/
+
+# 4. 设置环境变量（添加到 ~/.bashrc）
+echo 'export ONNXRUNTIME_DIR=~/work/tools/onnxruntime-gpu' >> ~/.bashrc
+echo 'export CUDNN8_LIB=~/work/tools/cudnn8-libs' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=~/work/tools/cudnn8-libs:~/work/tools/onnxruntime-gpu/lib:$LD_LIBRARY_PATH' >> ~/.bashrc
+source ~/.bashrc
+
+# 5. 验证 GPU 支持
+cd ~/work/tools/onnxruntime-gpu/lib
+ldd libonnxruntime_providers_cuda.so | grep -E "(cudnn|cublas)"
+# 应该显示所有依赖库都已找到
+```
+
+**性能对比：**
+| 版本 | FPS（预估） | 显存占用 | 适用场景 |
+|------|------------|---------|----------|
+| **CPU** | 5-15 | 0 GB | 离线处理、兼容性优先 |
+| **GPU** | 50-150 | 1-2 GB | 实时分析、大量视频处理 |
+
+**注意：** 
+- GPU 版本需要 **ONNX Runtime 1.16.3**（兼容 CUDA 11.x）
+- CPU 版本使用 **ONNX Runtime 1.23.2**（最新稳定版）
+- 两个版本可以共存，通过 CMake 参数选择
 
 ### 选项 B：从源码编译（高级用户）
 
