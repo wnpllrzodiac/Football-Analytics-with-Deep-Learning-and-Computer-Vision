@@ -7,13 +7,16 @@
 ## 📚 文档索引
 
 ### 快速开始
-- **`QUICKSTART.md`** - 从零开始的完整指南
+- **`QUICKSTART.md`** - 从零开始的完整指南（Windows）
+- **`LINUX_QUICKSTART.md`** - Linux 5 分钟快速上手 ✨NEW
 - **`QUICK_FIX.md`** - 常见问题快速修复
 - **`CONFIG_REFERENCE.md`** - 配置参考速查
 
 ### 安装配置
 - **`README.md`** - 项目总体文档和架构说明
 - **`INSTALL_WINDOWS.md`** - Windows详细安装指南
+- **`INSTALL_LINUX.md`** - Linux详细安装指南 ✨NEW
+- **`PLATFORM_COMPARISON.md`** - Windows vs Linux 平台对比 ✨NEW
 - **`ALL_TOOLS_README.md`** - 本文件：工具集总览
 
 ### 专题指南
@@ -36,9 +39,18 @@
 ## 🛠️ 工具脚本
 
 ### 构建和编译
+
+**Windows:**
 ```powershell
 build.bat              # 主构建脚本（CMake + 编译）
 rebuild.bat            # 快速重新编译（不配置）
+```
+
+**Linux:** ✨NEW
+```bash
+build_linux.sh         # Linux 构建脚本
+install_deps_linux.sh  # 安装所有依赖
+run_test_linux.sh      # 运行测试
 ```
 
 ### 模型转换
