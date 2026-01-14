@@ -64,19 +64,19 @@ esac
 
 echo ""
 echo "[2/4] Installing Python dependencies..."
-pip3 install --user \
-    ultralytics \
-    torch \
-    onnx \
-    onnxruntime \
-    flask \
-    flask-cors
+#pip3 install --user \
+#    ultralytics \
+#    torch \
+#    onnx \
+#    onnxruntime \
+#    flask \
+#    flask-cors
 
 echo ""
 echo "[3/4] Installing ONNX Runtime..."
 ONNX_VERSION="1.23.2"
 ONNX_URL="https://github.com/microsoft/onnxruntime/releases/download/v${ONNX_VERSION}/onnxruntime-linux-x64-${ONNX_VERSION}.tgz"
-ONNX_INSTALL_DIR="/opt/onnxruntime"
+ONNX_INSTALL_DIR="/home/zodiac/work/tools/onnxruntime"
 
 if [ -d "$ONNX_INSTALL_DIR" ]; then
     echo "ONNX Runtime already installed at $ONNX_INSTALL_DIR"
